@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import {
   Animated,
   Easing,
+  Image,
   ImageBackground,
   Pressable
 } from 'react-native';
@@ -14,37 +15,14 @@ const router = useRouter();
 export default function TabLayout() {
   const TabBarImage = require('@/components/TabBar.png');
   const HoverIcon = require('@/components/Hover.png');
-  const AddIcon = require('@/assets/images/ADD2.png');
+  const AddIcon = require('@/components/add.png');
   const MenuIcon = require('@/assets/images/menu1.png');
-  const AddIconRed = require('@/assets/images/REDD.png');
   
 
   // Animation refs
   const menuAnim = useRef(new Animated.Value(0)).current;
   const hoverAnim = useRef(new Animated.Value(1)).current;
   const addAnim = useRef(new Animated.Value(1)).current;
-
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  const handlePress = () => {
-    // Fade to red image
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 900, // fade in
-      useNativeDriver: true,
-    }).start(() => {
-      // Wait and fade back to original image
-      setTimeout(() => {
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 800, // fade out smoothly
-          useNativeDriver: true,
-        }).start();
-      }, 700); // duration to keep red image before fading back
-    });
-
-    router.push('/'); // Navigate to home or another screen
-  };
 
   // Menu animation
   const triggerMenuAnim = () => {
@@ -112,14 +90,7 @@ export default function TabLayout() {
             bottom: 10,
           },
           tabBarIcon: () => (
-            <Pressable
-                   onPress={() => {
-                            triggerBounce(hoverAnim);
-                            setTimeout(() => {
-                              router.push('/hover'); // Make sure you have an explore.tsx or explore/index.tsx screen
-                            }, 200); // Delay slightly to let bounce start
-                          }}
-                   >
+            <Pressable onPress={() => triggerBounce(hoverAnim)}>
               <Animated.Image
                 source={HoverIcon}
                 style={{
@@ -136,53 +107,46 @@ export default function TabLayout() {
 
       {/* Add Tab (Bounce) */}
       <Tabs.Screen
-      name="index"
-      options={{
-        title: '',
-        tabBarItemStyle: {
-          position: 'absolute',
-          left: '52%',
-          bottom: 9,
-          transform: [{ translateX: -28 }],
-        },
-        tabBarIcon: () => (
-          <Pressable onPress={handlePress}>
-            <Animated.View
-              style={{
-                padding: 0,
-                borderRadius: 90,
-                backgroundColor: 'transparent',
-              }}
-            >
-              {/* Original Icon */}
-              <Animated.Image
-                source={AddIcon}
-                style={{
-                  width: 110,
-                  height: 110,
-                  position: 'absolute',
-                  opacity: fadeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [1, 0],
-                  }),
-                }}
-                resizeMode="contain"
-              />
-              {/* Red Icon */}
-              <Animated.Image
-                source={AddIconRed}
-                style={{
-                  width: 110,
-                  height: 110,
-                  opacity: fadeAnim,
-                }}
-                resizeMode="contain"
-              />
-            </Animated.View>
-          </Pressable>
-        ),
-      }}
-    />
+        name="index"
+        options={{
+          title: '',
+          tabBarItemStyle: {
+            position: 'absolute',
+            left: '52%',
+            bottom: 9,
+            transform: [{ translateX: -28 }],
+          },
+          tabBarIcon: () => {
+                      const bgColor = menuAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['transparent', '#9b5de5'],
+                      });
+          
+                      return (
+                        <Pressable
+                            onPress={() => {
+                              triggerMenuAnim();
+                              router.push('/'); // or use exact path like '/index' or '/home'
+                            }}
+                          >
+                          <Animated.View
+                            style={{
+                              padding: 10,
+                              borderRadius: 90,
+                              backgroundColor: bgColor,
+                            }}
+                          >
+                            <Image
+                              source={AddIcon}
+                              style={{ width: 110, height: 110 }}
+                              resizeMode="contain"
+                            />
+                          </Animated.View>
+                        </Pressable>
+                      );
+                    },
+        }}
+      />
 
       {/* Menu Tab (Color Change) */}
       <Tabs.Screen
